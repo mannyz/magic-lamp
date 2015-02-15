@@ -1,9 +1,8 @@
 #ifndef DIALOG_H
 #define DIALOG_H
 
-#include <QDialog>
-
 #include "fitlvstream.h"
+#include <QtWidgets/QDialog>
 
 namespace Ui {
 class Dialog;
@@ -13,16 +12,29 @@ class Dialog : public QDialog
 {
     Q_OBJECT
 
+    enum State {
+        Disconnected,
+        Connecting,
+        Connected
+    };
+
 public:
     explicit Dialog(QWidget *parent = 0);
     ~Dialog();
 
 private slots:
-    void connectToHost();
+    void setState(State state);
+    void updateState();
+    void onConnectedToHost();
+    void onDisconnectedFromHost();
+    void onError(int socketError, const QString &message);
 
 private:
     Ui::Dialog *ui;
-    FiTLVStream stream;
+
+private:
+    FiTLVStream m_tlvStream;
+    State m_state;
 
 };
 #endif // DIALOG_H

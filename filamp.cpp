@@ -39,7 +39,6 @@ void FiLamp::onNewTLV(const FiTLV &tlv)
         }
     } break;
     }
-
     update();
 }
 

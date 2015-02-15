@@ -21,7 +21,7 @@ FiCommandOn::FiCommandOn()
 FiTLV FiCommandOn::tlvFromData() const
 {
     FiTLV result;
-    result.setType(FiMagicCommand::ON);
+    result.setTypeAndLength(FiMagicCommand::ON);
     return result;
 }
 
@@ -34,7 +34,7 @@ FiCommandOff::FiCommandOff()
 FiTLV FiCommandOff::tlvFromData() const
 {
     FiTLV result;
-    result.setType(FiMagicCommand::OFF);
+    result.setTypeAndLength(FiMagicCommand::OFF);
     return result;
 }
 
@@ -46,12 +46,12 @@ FiCommandColor::FiCommandColor()
 
 FiTLV FiCommandColor::tlvFromData() const
 {
-    FiTLV result;
-    result.setType(FiMagicCommand::COLOR);
     QByteArray value;
     value.push_back(m_color.red());
     value.push_back(m_color.green());
     value.push_back(m_color.blue());
+    FiTLV result;
+    result.setTypeAndLength(FiMagicCommand::COLOR, 3);
     result.setValue(value);
     return result;
 }

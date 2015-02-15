@@ -4,13 +4,8 @@
 
 FiTLV::FiTLV()
    : m_type(0)
+   , m_isClear(true)
 {
-}
-
-void FiTLV::setType(quint8 type)
-{
-    m_type = type;
-    m_value.clear();
 }
 
 QByteArray FiTLV::bigEndianData() const
