@@ -21,6 +21,8 @@ class Dialog : public QDialog
 public:
     explicit Dialog(QWidget *parent = 0);
     ~Dialog();
+    virtual bool event(QEvent *event);
+    virtual bool eventFilter(QObject *obj, QEvent *event);
 
 private slots:
     void setState(State state);

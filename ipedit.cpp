@@ -6,6 +6,9 @@
 #include <QKeyEvent>
 #include <QRegExpValidator>
 
+#include <QtCore/QCoreApplication>
+#include <QDebug>
+
 IPEdit::IPEdit(QWidget *parent)
     : QFrame(parent)
 {
@@ -57,6 +60,19 @@ IPEdit::IPEdit(QWidget *parent)
 
     connect(this, SIGNAL(checkOctet(int)), this, SLOT(onCheckOctet(int)), Qt::QueuedConnection);
     connect(this, SIGNAL(checkAcceptIp()), this, SLOT(onCheckAcceptIp()), Qt::QueuedConnection);
+
+    //tooltip
+    connect(&m_toolTipAnimationTimer, SIGNAL(timeout())
+            , this, SLOT(toolTipAnimationUpdate()));
+    m_toolTipAnimationTimer.setInterval(500);
+    m_toolTipAnimationEvents.push_back("12");
+    m_toolTipAnimationEvents.push_back("1");
+    m_toolTipAnimationEvents.push_back("");
+    m_toolTipAnimationEvents.push_back("1");
+    m_toolTipAnimationEvents.push_back("12");
+    m_toolTipAnimationEvents.push_back("127");
+    m_ToolTipAnimationStep = 0;
+    m_isToolTipAnimationRun = false;
 }
 
 void IPEdit::setIp(const QString &ip)
@@ -65,6 +81,7 @@ void IPEdit::setIp(const QString &ip)
     for (int i = 0; i < 4; ++i) {
         m_octetEdit[i]->setText(octets[i]);
     }
+    emit checkAcceptIp();
 }
 
 void IPEdit::setPort(const QString &port)
@@ -88,52 +105,54 @@ bool IPEdit::eventFilter(QObject *obj, QEvent *event)
         return true;
     }
 
-    if (m_portEdit == obj
-        && event->type() == QEvent::KeyPress) {
-        emit checkAcceptIp();
-    } else {
-        for (int i = 0; i < 4; ++i) {
-            if (m_octetEdit[i] == obj
-                && event->type() == QEvent::KeyPress) {
-                   QKeyEvent *ke = static_cast<QKeyEvent*>(event);
-                   switch (ke->key()) {
-                   case Qt::Key_Left:
-                       if (m_octetEdit[i]->cursorPosition() == 0) {
-                           moveToLeftOctet(i);
-                       } break;
+    if (event->type() == QEvent::KeyPress) {
+        if (m_portEdit == obj) {
+            emit checkAcceptIp();
+        } else {
+            for (int i = 0; i < 4; ++i) {
+                if (m_octetEdit[i] == obj) {
+                       QKeyEvent *ke = static_cast<QKeyEvent*>(event);
+                       switch (ke->key()) {
+                       case Qt::Key_Left:
+                           if (m_octetEdit[i]->cursorPosition() == 0) {
+                               moveToLeftOctet(i);
+                           } break;
 
-                   case Qt::Key_Right:
-                       if (m_octetEdit[i]->text().size() == m_octetEdit[i]->cursorPosition()
-                           || m_octetEdit[i]->text().isEmpty()) {
+                       case Qt::Key_Right:
+                           if (m_octetEdit[i]->text().size() == m_octetEdit[i]->cursorPosition()
+                               || m_octetEdit[i]->text().isEmpty()) {
+                               moveToRightOctet(i);
+                           } break;
+
+                       case Qt::Key_Backspace:
+                           if (m_octetEdit[i]->text().isEmpty()
+                                   || m_octetEdit[i]->cursorPosition() == 0) {
+                               moveToLeftOctet(i);
+                           }
+                           emit checkAcceptIp();
+                           break;
+
+                       case Qt::Key_Period:
+                       case Qt::Key_Comma:
                            moveToRightOctet(i);
-                       } break;
+                           break;
 
-                   case Qt::Key_Backspace:
-                       if (m_octetEdit[i]->text().isEmpty()
-                               || m_octetEdit[i]->cursorPosition() == 0) {
-                           moveToLeftOctet(i);
+                       case Qt::Key_0:
+                           if (m_octetEdit[i]->text().isEmpty()
+                                   || m_octetEdit[i]->text() == "0") {
+                               moveToRightOctet(i);
+                           }
+                       default:
+                           emit checkOctet(i);
+                           emit checkAcceptIp();
+                           break;
+
                        }
-                       emit checkAcceptIp();
-                       break;
-
-                   case Qt::Key_Period:
-                   case Qt::Key_Comma:
-                       moveToRightOctet(i);
-                       break;
-
-                   case Qt::Key_0:
-                       if (m_octetEdit[i]->text().isEmpty()
-                               || m_octetEdit[i]->text() == "0") {
-                           moveToRightOctet(i);
-                       }
-                   default:
-                       emit checkOctet(i);
-                       emit checkAcceptIp();
-                       break;
-
-                   }
+                }
             }
         }
+    } else if (event->type() == QEvent::FocusIn) {
+        toolTipAnimationStop();
     }
 
     return false;
@@ -145,6 +164,10 @@ void IPEdit::moveToRightOctet(int i)
         m_octetEdit[i+1]->setFocus();
         m_octetEdit[i+1]->setCursorPosition(0);
         m_octetEdit[i+1]->selectAll();
+    } else if (i == 3) {
+        m_portEdit->setFocus();
+        m_portEdit->setCursorPosition(0);
+        m_portEdit->selectAll();
     }
 }
 
@@ -182,4 +205,54 @@ void IPEdit::onCheckAcceptIp()
     } else {
         setStyleSheet( "* {background: hotpink }" );
     }
+}
+
+void IPEdit::toolTipAnimationUpdate()
+{
+    if (!m_isToolTipAnimationRun) {
+        return;
+    }
+
+    if(m_ToolTipAnimationStep == m_toolTipAnimationEvents.size()) {
+        toolTipAnimationRestart();
+        return;
+    }
+
+    m_octetEdit[0]->setText(m_toolTipAnimationEvents[m_ToolTipAnimationStep]);
+    ++m_ToolTipAnimationStep;
+    checkAcceptIp();
+}
+
+void IPEdit::toolTipAnimationStart()
+{
+    if(m_isToolTipAnimationRun) {
+        return;
+    }
+    m_toolTipAnimationPrevIp = ip();
+    setIp("127.0.0.1");
+    m_isToolTipAnimationRun = true;
+    m_ToolTipAnimationStep = 0;
+    for (int i = 0; i < 4; ++i) {
+        m_octetEdit[i]->clearFocus();
+    }
+    m_toolTipAnimationTimer.start();
+}
+
+void IPEdit::toolTipAnimationStop()
+{
+    if(!m_isToolTipAnimationRun) {
+        return;
+    }
+    m_isToolTipAnimationRun = false;
+    setIp(m_toolTipAnimationPrevIp);
+    m_toolTipAnimationTimer.stop();
+    m_ToolTipAnimationStep = 0;
+}
+
+void IPEdit::toolTipAnimationRestart()
+{
+    if(!m_isToolTipAnimationRun) {
+        return;
+    }
+    m_ToolTipAnimationStep = 0;
 }

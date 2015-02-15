@@ -19,6 +19,7 @@ Dialog::Dialog(QWidget *parent)
       ui->ipEdit->setPort();
 
       connect(ui->connectBtn, SIGNAL(clicked()), this, SLOT(updateState()));
+      ui->connectBtn->installEventFilter(this);
       setWindowTitle(tr("MagicLamp Client"));
 
       connect(&m_tlvStream, SIGNAL(newTLV(const FiTLV &)), ui->widget, SLOT(onNewTLV(const FiTLV &)));
@@ -28,6 +29,9 @@ Dialog::Dialog(QWidget *parent)
 
       m_tlvStream.moveToThread(new QThread(this));
       m_tlvStream.thread()->start();
+
+      this->setFocus();
+      ui->ipEdit->toolTipAnimationStart();
 }
 
 void Dialog::onConnectedToHost()
@@ -71,6 +75,26 @@ Dialog::~Dialog()
     m_tlvStream.abort();
     m_tlvStream.thread()->quit();
     delete ui;
+}
+
+bool Dialog::event(QEvent *event)
+{
+    if(event->type() == QEvent::MouseButtonPress) {
+        this->setFocus();
+        ui->ipEdit->toolTipAnimationStart();
+    }
+
+    return QDialog::event(event);
+}
+
+bool Dialog::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == ui->connectBtn
+        && (event->type() == QEvent::Enter || event->type() == QEvent::FocusIn)) {
+        ui->ipEdit->toolTipAnimationStop();
+    }
+
+    return QDialog::eventFilter(obj, event);
 }
 
 void Dialog::setState(Dialog::State state)

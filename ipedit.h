@@ -2,6 +2,8 @@
 #define IPEDIT_H
 
 #include <QFrame>
+#include <QTimer>
+#include <QVector>
 
 QT_BEGIN_NAMESPACE
 class QLineEdit;
@@ -32,13 +34,28 @@ signals:
     void checkOctet(int i);
     void checkAcceptIp();
 
+public slots:
+    void toolTipAnimationStart();
+    void toolTipAnimationStop();
+
 private slots:
     void onCheckOctet(int i);
     void onCheckAcceptIp();
+    //
+    void toolTipAnimationUpdate();
+    void toolTipAnimationRestart();
 
 private:
     QLineEdit *m_octetEdit[4];
     QLineEdit *m_portEdit;
+
+private:
+    bool m_isToolTipAnimationAllowed;
+    bool m_isToolTipAnimationRun;
+    QTimer m_toolTipAnimationTimer;
+    QVector<QString> m_toolTipAnimationEvents;
+    int m_ToolTipAnimationStep;
+    QString m_toolTipAnimationPrevIp;
 
 
 };
