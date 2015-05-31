@@ -26,6 +26,7 @@ IPEdit::IPEdit(QWidget *parent)
         if (i != 0) {
             QLabel *l = new QLabel(".", this);
             l->setFixedHeight(22);
+            l->setFixedWidth(3);
             ipLayout->addWidget(l);
 
         }
@@ -34,6 +35,7 @@ IPEdit::IPEdit(QWidget *parent)
         m_octetEdit[i]->setFrame(false);
         m_octetEdit[i]->setAlignment(Qt::AlignCenter);
         m_octetEdit[i]->setFixedHeight(22);
+        m_octetEdit[i]->setFixedWidth(30);
         m_octetEdit[i]->setValidator(ipV);
         m_octetEdit[i]->installEventFilter(this);
 
@@ -42,12 +44,13 @@ IPEdit::IPEdit(QWidget *parent)
 
     QLabel *l = new QLabel(":", this);
     l->setFixedHeight(22);
+    l->setFixedWidth(3);
     ipLayout->addWidget(l);
     m_portEdit = new QLineEdit(this);
     m_portEdit->setFrame(false);
     m_portEdit->setAlignment(Qt::AlignCenter);
     m_portEdit->setFixedHeight(22);
-    m_portEdit->setFixedWidth(50);
+    m_portEdit->setFixedWidth(40);
     QRegExp portRx("^(?:102[4-9]|1[1-9]{3}|[2-9][1-9]{3}|[1-6][1-5][1-5][1-3][1-5])$");
     QValidator *portV = new QRegExpValidator(portRx, this);
     m_portEdit->setValidator(portV);
@@ -192,13 +195,16 @@ void IPEdit::onCheckAcceptIp()
 {
     bool ipOk = true;
     int pos = 0;
+    QString text;
     for (int i = 0; i < 4; ++i) {
         pos = 0;
-        ipOk &= (m_octetEdit[i]->validator()->validate(m_octetEdit[i]->text(), pos) != QValidator::Invalid);
+        text = m_octetEdit[i]->text();
+        ipOk &= (m_octetEdit[i]->validator()->validate(text, pos) != QValidator::Invalid);
         ipOk &= !m_octetEdit[i]->text().isEmpty();
     }
     pos = 0;
-    ipOk &= (m_portEdit->validator()->validate(m_portEdit->text(), pos) == QValidator::Acceptable);
+    text = m_portEdit->text();
+    ipOk &= (m_portEdit->validator()->validate(text, pos) == QValidator::Acceptable);
     ipOk &= !m_portEdit->text().isEmpty();
     if (ipOk) {
         setStyleSheet( "* {background: limegreen}" );

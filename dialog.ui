@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>340</width>
+    <width>370</width>
     <height>300</height>
    </rect>
   </property>
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>340</width>
+    <width>370</width>
     <height>300</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>340</width>
+    <width>370</width>
     <height>300</height>
    </size>
   </property>
@@ -79,7 +79,7 @@
      <item>
       <widget class="QPushButton" name="connectBtn">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -92,7 +92,7 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>150</width>
+         <width>100</width>
          <height>28</height>
         </size>
        </property>
