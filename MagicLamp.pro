@@ -18,8 +18,7 @@ SOURCES += main.cpp\
     dialog.cpp \
     filamp.cpp \
     fimagiccommand.cpp \
-    ipedit.cpp \
-    fitcpsocketforthread.cpp
+    ipedit.cpp
 
 HEADERS  += \
     fitlv.h \
@@ -27,8 +26,7 @@ HEADERS  += \
     dialog.h \
     filamp.h \
     fimagiccommand.h \
-    ipedit.h \
-    fitcpsocketforthread.h
+    ipedit.h
 
 OTHER_FILES +=
 

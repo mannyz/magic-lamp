@@ -4,8 +4,6 @@
 #include "filamp.h"
 #include "ipedit.h"
 
-#include "fitcpsocketforthread.h"
-
 #include <QtCore/QThread>
 #include <QtWidgets/QMessageBox>
 
@@ -26,9 +24,6 @@ Dialog::Dialog(QWidget *parent)
       connect(&m_tlvStream, SIGNAL(connectedToHost()), this, SLOT(onConnectedToHost()));
       connect(&m_tlvStream, SIGNAL(disconnectedFromHost()), this, SLOT(onDisconnectedFromHost()));
       connect(&m_tlvStream, SIGNAL(socketError(int, const QString &)), this, SLOT(onError(int, const QString &)));
-
-      m_tlvStream.moveToThread(new QThread(this));
-      m_tlvStream.thread()->start();
 
       this->setFocus();
       ui->ipEdit->toolTipAnimationStart();
@@ -73,7 +68,8 @@ void Dialog::onError(int socketError, const QString &message)
 Dialog::~Dialog()
 {   
     m_tlvStream.abort();
-    m_tlvStream.thread()->quit();
+    m_tlvStream.quit();
+    m_tlvStream.wait();
     delete ui;
 }
 

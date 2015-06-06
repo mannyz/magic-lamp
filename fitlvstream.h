@@ -2,16 +2,20 @@
 #define FITLVSTREAM_H
 
 #include "fitlv.h"
-#include "fitcpsocketforthread.h"
 
-#include <QtCore/QObject>
+#include <QtCore/QThread>
+#include <QtNetwork/QTcpSocket>
 
-class FiTLVStream : public QObject
+class FiTLVStream : public QThread
 {
     Q_OBJECT
 
 public:
     explicit FiTLVStream(QObject *parent = 0);
+    bool event(QEvent * e);
+
+protected:
+    void run();
 
 signals:
     void newTLV(const FiTLV &tlv);
@@ -25,12 +29,11 @@ public slots:
     void abort();
 
 private slots:
-    void readTLV();
-    void onSocketError(QAbstractSocket::SocketError socketError);
+    void onReadyRead();
+    void onSocketError(QAbstractSocket::SocketError);
 
 private:
-    FiTcpSocketForThread m_tcpSocket;
-    FiTLV m_tlvBuf;
+    QTcpSocket *m_tlvSocket;
 
 };
 
