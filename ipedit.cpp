@@ -51,7 +51,7 @@ IPEdit::IPEdit(QWidget *parent)
     m_portEdit->setAlignment(Qt::AlignCenter);
     m_portEdit->setFixedHeight(22);
     m_portEdit->setFixedWidth(40);
-    QRegExp portRx("^(?:102[4-9]|1[1-9]{3}|[2-9][1-9]{3}|[1-6][1-5][1-5][1-3][1-5])$");
+    QRegExp portRx("^(?:102[4-9]|10[3-9][0-9]|1[1-9]{3}|[2-9][1-9]{3}|[1-6][1-5][1-5][1-3][1-5])$");
     QValidator *portV = new QRegExpValidator(portRx, this);
     m_portEdit->setValidator(portV);
     m_portEdit->installEventFilter(this);
